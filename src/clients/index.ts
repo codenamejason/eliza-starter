@@ -17,7 +17,7 @@ export async function initializeClients(
   }
 
   if (clientTypes.includes("discord")) {
-    clients.push(await DiscordClientInterface.start(runtime));
+    clients.push(await DiscordClientInterface.start(runtime as any));
   }
 
   if (clientTypes.includes("telegram")) {

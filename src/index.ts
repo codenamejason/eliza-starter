@@ -25,6 +25,7 @@ import {
 import { initializeDatabase } from "./database/index.ts";
 import { GitRepoFetcher } from "./services/github/repo-fetcher.js";
 import { GitConnector } from "./services/github/git-connector.js";
+import { TeamBuilderAnalysis } from "./services/team-builder/analysis.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,6 +39,14 @@ export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
 let nodePlugin: any | undefined;
 
 const connector = new GitConnector(process.env.GITHUB_TOKEN);
+const analysis = new TeamBuilderAnalysis();
+
+async function analyzeBounty() {
+  const bountySummaries = await analysis.analyzeBounties();
+  console.log(bountySummaries);
+
+  return bountySummaries;
+}
 
 async function fetchRepoCode(repoUrls: string[]) {
   for (const repo of repoUrls) {
@@ -207,6 +216,11 @@ const startAgents = async () => {
     chat();
   }
 };
+
+analyzeBounty().catch((error) => {
+  elizaLogger.error("Unhandled error in analyzeBounty:", error);
+  process.exit(1);
+});
 
 startAgents().catch((error) => {
   elizaLogger.error("Unhandled error in startAgents:", error);

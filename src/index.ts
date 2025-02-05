@@ -23,6 +23,8 @@ import {
   parseArguments,
 } from "./config/index.ts";
 import { initializeDatabase } from "./database/index.ts";
+import { GitRepoFetcher } from "./services/github/repo-fetcher.js";
+import { GitConnector } from "./services/github/git-connector.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +37,40 @@ export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
 
 let nodePlugin: any | undefined;
 
+const connector = new GitConnector(process.env.GITHUB_TOKEN);
+
+async function fetchRepoCode(repoUrls: string[]) {
+  for (const repo of repoUrls) {
+    try {
+      await connector.addRepository(repo);
+      const summary = connector.getRepositorySummary(repo);
+      console.log(`Processed ${repo}: ${summary?.totalFiles} files`);
+    } catch (error) {
+      console.error(`Failed to process ${repo}:`, error);
+    }
+  }
+
+  // fetch all repositories without dependencies
+  const codeSummary = await connector.fetchAllWithoutDependencies();
+
+  return codeSummary;
+}
+
+// Alternative static method for batch processing
+async function batchProcessRepositories(submissions: string[]) {
+  const summaries = await GitConnector.processRepositories(
+    submissions,
+    process.env.GITHUB_TOKEN
+  );
+  return summaries;
+}
+
+async function analyzeRepositories(repoUrls: string[]) {
+  // todo: Implement the analysis logic here
+
+  throw new Error("Not implemented");
+}
+
 export function createAgent(
   character: Character,
   db: any,
@@ -44,7 +80,7 @@ export function createAgent(
   elizaLogger.success(
     elizaLogger.successesTitle,
     "Creating runtime for character",
-    character.name,
+    character.name
   );
 
   nodePlugin ??= createNodePlugin();
@@ -100,7 +136,7 @@ async function startAgent(character: Character, directClient: DirectClient) {
   } catch (error) {
     elizaLogger.error(
       `Error starting agent for character ${character.name}:`,
-      error,
+      error
     );
     console.error(error);
     throw error;
@@ -165,7 +201,7 @@ const startAgents = async () => {
   }
 
   const isDaemonProcess = process.env.DAEMON_PROCESS === "true";
-  if(!isDaemonProcess) {
+  if (!isDaemonProcess) {
     elizaLogger.log("Chat started. Type 'exit' to quit.");
     const chat = startChat(characters);
     chat();

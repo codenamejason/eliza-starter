@@ -1,7 +1,7 @@
-*.ts
 dist
 !index.ts
 !character.ts
+!professorGwei.ts
 .env
 node_modules
 dist/

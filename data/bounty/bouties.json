@@ -1,0 +1,8 @@
+{
+  "name": "Bounty 1",
+  "description": "Bounty 1 description",
+  "tags": ["tag1", "tag2", "tag3"],
+  "difficulty": "easy",
+  "sponsor": "Bounty 1 Sponsor",
+  "reward": 100
+}

@@ -1,8 +1,6 @@
-import { Character } from "@elizaos/core";
-import { professorGwei } from "../characters/professorGwei.js";
+import { Character, Clients, defaultCharacter, ModelProviderName } from "@elizaos/core";
 
 export const character: Character = {
-  ...professorGwei,
-};
+    ...defaultCharacter,
 
-export const characters = [character];
+};
